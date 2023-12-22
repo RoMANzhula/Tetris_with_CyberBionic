@@ -119,7 +119,8 @@ function generateTetromino() {
 
   // Home work task #4
   const columnTetro = Math.floor((PLAYFIELD_COLUMNS - matrixTetro[0].length) / 2);
-  const rowTetro = 0;
+  // Home work task #6
+  const rowTetro = -2;
 
   //  Home work task #5
   document.documentElement.style.setProperty(`--${nameTetro}-color`, colorTetro);
@@ -252,8 +253,22 @@ function isOutsideOfGameBoard(row, column) {
          tetromino.row + row >= PLAYFIELD_ROWS;
 }
 
+// Home work task 6
 function hasCollisions(row, column) {
-  return playfield[tetromino.row + row][tetromino.column + column];
+  const targetRow = tetromino.row + row;
+  const targetColumn = tetromino.column + column;
+
+  if (
+    targetRow < 0 ||
+    targetRow >= PLAYFIELD_ROWS ||
+    targetColumn < 0 ||
+    targetColumn >= PLAYFIELD_COLUMNS
+  ) {
+    // Поза межами ігрового поля, немає зіткнень
+    return false;
+  }
+
+  return playfield[targetRow][targetColumn] !== 0;
 }
 
 function placeTetromino() {
@@ -336,7 +351,7 @@ function rotateMatrix(matrixTetromino) {
   return rotateMatrix;
 };
 
-// №9
+// Home work task #9
 setInterval(() => {
   moveTetrominoDown();
 }, 1000);
