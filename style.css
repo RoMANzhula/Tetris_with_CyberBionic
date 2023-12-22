@@ -12,12 +12,14 @@ body {
 }
 
 .tetris {
-  background-color: #eb6d6d;
+  background-color: #aea9a9;
   padding: 0.5vh;
   border-radius: 0.5vh;
+  border: 2px solid #000;
   display: grid;
   grid-template-columns: repeat(10, auto);
   grid-template-rows: repeat(20, auto);
+  margin-right: 10px; /* Home work task #7*/
 }
 
 .tetris div {
@@ -26,6 +28,7 @@ body {
   background-color: rgba(97, 75, 75, 0.205);
   border-radius: 0.3vh;
   box-shadow: inset 2px 2px 2px rgba(128, 128, 128, 0.271),
+              inset 0px 0px 2px rgba(79, 152, 5, 0.271),
               inset -2px -2px 2px rgba(22, 87, 217, 0.271);
 }
 
@@ -73,4 +76,30 @@ body {
 /*   background: rgb(5, 5, 124);
  */  background: var(--P-color);
 
+}
+
+/* Home work task #7*/
+.score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.score {
+  padding: 5px;
+  background-color: #88ea95;
+  border: 2px solid #000;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+#score-label {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+#score-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ff4500; 
 }

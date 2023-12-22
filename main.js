@@ -300,6 +300,13 @@ function placeTetromino() {
 }
 
 function removeFillRows(filledRows) {
+  // Home work task #8
+  const rowsCount = filledRows.length;
+  if (rowsCount > 0) {
+    score += calculateScore(filledRows);
+    updateScore();
+  }
+
   filledRows.forEach(row => {
     dropRowsAbove(row);
   })
@@ -350,6 +357,32 @@ function rotateMatrix(matrixTetromino) {
   }
   return rotateMatrix;
 };
+
+// Home work task #7
+let score = 0;
+const scoreLabelElement = document.getElementById('score-label');
+const scoreValueElement = document.getElementById('score-value');
+
+// Home work task #7
+function updateScore() {
+  scoreValueElement.textContent = score;
+}
+
+// Home work task #8
+function calculateScore(filledRows) {
+  switch (filledRows.length) {
+    case 1:
+      return 10;
+    case 2:
+      return 30;
+    case 3:
+      return 50;
+    case 4:
+      return 100;
+    default:
+      return 0;
+  }
+}
 
 // Home work task #9
 setInterval(() => {
