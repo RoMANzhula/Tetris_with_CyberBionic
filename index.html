@@ -10,20 +10,38 @@
   <!-- Home work task #7-->
   <div class="tetris-container">
     
-    <div class="score-container">
-      <div class="score">
-        <span id="score-label">Score:</span>
-        <span id="score-value">0</span>
+    <div class="tetris"></div> 
+    
+    <!-- Home work task #11 and #12-->
+    <div class="game-controls">
+      <div class="score-container">
+        <div class="score">
+          <span id="score-label">Score:</span>
+          <span id="score-value">0</span>
+        </div>
+      </div>
+      <div class="control-row">
+        <button class="control-button" onclick="rotateTetromino()">↻</button>
+        <div class="control-group">
+          <button class="control-button" onclick="moveTetrominoLeft()">←</button>
+          <button class="control-button" onclick="moveTetrominoDown()">↓</button>
+          <button class="control-button" onclick="moveTetrominoRight()">→</button>
+        </div>
+        <div class="control-group">
+          <button class="control-button" onclick="dropTetrominoDown()">Space</button>
+          <button class="control-button" onclick="restartGame()">Restart</button>
+          <button class="control-button" onclick="togglePause()">Pause</button>
+        </div>
       </div>
     </div>
-    <div class="tetris"></div> 
   </div>
 
   <div class="game-over" style="display: none;">
-    <h1>Гра закінчена!</h1>
-    <p>Ваш рахунок: <span id="final-score">0</span></p>
-    <button class="restart">Знову грати</button>
+    <h1>Game over!</h1>
+    <p>Your score: <span id="final-score">0</span></p>
+    <button class="restart">New Game</button>
   </div>
+  
 
   <script src="main.js"></script>
 </body>
