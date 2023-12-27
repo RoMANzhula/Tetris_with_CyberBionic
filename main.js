@@ -9,6 +9,13 @@
 // 8. Прописати логіку для балів гри. (10 - 30 - 50 - 100 балів)
 // 9. Реалізувати самостійний рух фігур.
 
+// 10. Зробити розмітку висновків гри по її завершенню.
+// 11. Зверстати окрему кнопку рестарт що перезапускатиме гру.
+// 12. Додати клавіатуру на екрані браузеру для руху фігур.
+// 13. Відображати фігуру, яка буде випадати наступною.
+// 14. Додати рівні грипри котрих буде збільшуватись швидкість падіння фігур.
+// 15. Зберігати і виводити найкращій власний результат
+
 const PLAYFIELD_COLUMNS = 10;
 const PLAYFIELD_ROWS = 20;
 
@@ -85,6 +92,8 @@ let playfield;
 let tetromino;
 // Home work task #5
 let previousColor;
+let isPaused = false;
+let isGameOver = false;
 
 // Home work task #5
 function getRandomColor() {
@@ -179,6 +188,9 @@ document.addEventListener('keydown', onKeyDown)
 
 function onKeyDown(event) {
   switch (event.key) {
+    case ' ':
+      dropTetrominoDown();
+      break;
     case 'ArrowUp':
       rotateTetromino();
       draw();
@@ -192,7 +204,18 @@ function onKeyDown(event) {
     case 'ArrowRight':
       moveTetrominoRight();
       break;
+    case 'P':
+    case 'p':
+      togglePause();
+      break;  
   }
+}
+
+function dropTetrominoDown() {
+  while (!isValid()) {
+    tetromino.row++;
+  }
+  tetromino.row--;
 }
 
 function moveTetrominoDown() {
@@ -264,7 +287,7 @@ function hasCollisions(row, column) {
     targetColumn < 0 ||
     targetColumn >= PLAYFIELD_COLUMNS
   ) {
-    // Поза межами ігрового поля, немає зіткнень
+    // Поза межами ігрового поля, немає зіткнень, тобто дозволяємо вихід за межі ігрового поля
     return false;
   }
 
@@ -295,6 +318,13 @@ function placeTetromino() {
   const filledRows = findFilledRows();
   removeFillRows(filledRows);
 
+  //якщо вже фігури не становляться в ігрове поле
+  if (!isValid()) {
+    isGameOver = true;
+    gameOver(); // Викликаємо функцію завершення гри
+    return;
+  }
+
   generateTetromino();
   draw();
 }
@@ -310,6 +340,12 @@ function removeFillRows(filledRows) {
   filledRows.forEach(row => {
     dropRowsAbove(row);
   })
+
+  // Перевіряємо, чи є гра закінчена після вилучення рядків
+  if (!isValid()) {
+    isGameOver = true;
+    gameOver(); // Викликаємо функцію завершення гри
+  }
 }
 
 function dropRowsAbove(rowDelete) {
@@ -386,5 +422,67 @@ function calculateScore(filledRows) {
 
 // Home work task #9
 setInterval(() => {
-  moveTetrominoDown();
+  if (!isPaused) {
+    moveTetrominoDown();
+  }
 }, 1000);
+
+
+let tetrominoInterval;
+let lastMoveTime = 0;
+const moveInterval = 1000; // Інтервал руху тетроміно
+
+function togglePause() {
+  if (isGameOver) {
+    return; // Ігноруємо паузу, якщо гра вже завершилася
+  }
+
+  isPaused = !isPaused;
+
+  if (isPaused) {
+    // Зупинка руху тетроміно і таймера
+    clearInterval(tetrominoInterval);
+  } else {
+    // Відновлення руху тетроміно і таймера
+    const currentTime = Date.now();
+    const timeElapsedSinceLastMove = currentTime - lastMoveTime;
+
+    tetrominoInterval = setInterval(() => {
+      if (!isPaused) {
+        // Враховуємо час, пройдений з останнього руху тетроміно
+        if (timeElapsedSinceLastMove >= moveInterval) {
+          moveTetrominoDown();
+          lastMoveTime = currentTime;
+        }
+      }
+    }, moveInterval - timeElapsedSinceLastMove); // Залишений час до наступного руху
+  }
+}
+
+function gameOver() {
+  isGameOver = true;
+  togglePause();
+  document.getElementById('final-score').textContent = score;
+  gameOverBlock.style.display = 'flex';
+}
+
+const gameOverBlock = document.querySelector('.game-over')
+const btnRestart = document.querySelector('.restart')
+
+btnRestart.addEventListener('click', restartGame);
+
+function restartGame() {
+  // Скидання всіх значень на початкові
+  isGameOver = false;
+  isPaused = false;
+  score = 0;
+  updateScore();
+  playfield = new Array(PLAYFIELD_ROWS).fill().map(() => new Array(PLAYFIELD_COLUMNS).fill(0));
+  generateTetromino();
+  draw();
+  // Сховати блок завершення гри, якщо він відображений
+  gameOverBlock.style.display = 'none';
+  // Перезапуск інтервалу руху тетроміно
+  clearInterval(tetrominoInterval);
+  tetrominoInterval = setInterval(moveTetrominoDown, moveInterval);
+}
