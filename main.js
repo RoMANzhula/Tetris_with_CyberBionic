@@ -10,10 +10,10 @@
 // 9. Реалізувати самостійний рух фігур.
 
 // 10. Зробити розмітку висновків гри по її завершенню.
-// 11. Зверстати окрему кнопку рестарт що перезапускатиме гру.
+// 11. Зверстати окрему кнопку рестартб що перезапускатиме гру.
 // 12. Додати клавіатуру на екрані браузеру для руху фігур.
 // 13. Відображати фігуру, яка буде випадати наступною.
-// 14. Додати рівні гри при котрих буде збільшуватись швидкість падіння фігур.
+// 14. Додати рівні грипри котрих буде збільшуватись швидкість падіння фігур.
 // 15. Зберігати і виводити найкращій власний результат
 
 const PLAYFIELD_COLUMNS = 10;
@@ -33,15 +33,16 @@ const TETROMINO_COLORS = [
 ];
 
 const TETROMINO_NAMES = [
-  'O',
+/*   'O',
   'L',
   // Home work task #1
   'J',
   'S',
   'Z',
-  'T',
-  'I',
-  'P'
+  'T', */
+  'I'
+/*   ,
+  'P' */
 ];
 
 const TETROMINOES = {
@@ -263,12 +264,46 @@ function isValid() {
   for (let row = 0; row < matrixSize; row++) {
     for (let column = 0; column < matrixSize; column++) {
       if (!tetromino.matrix[row][column]) {continue};
-      if (isOutsideOfGameBoard(row, column)) {return true}
-      if (hasCollisions(row, column)) {return true}
+      if (isOutsideOfGameBoard(row, column)) {return true};
+      if (hasCollisions(row, column)) {return true};
+      // Перевірка, чи фігура не заходить за верхню межу ігрового поля
+      if (tetromino.row < 0) {
+        return false;
+      }
     }
   }
   return false;
 }
+/* function isValid() {
+  const matrixSize = tetromino.matrix.length;
+
+  for (let row = 0; row < matrixSize; row++) {
+    for (let column = 0; column < matrixSize; column++) {
+      if (!tetromino.matrix[row][column]) continue;
+
+      const targetRow = tetromino.row + row;
+      const targetColumn = tetromino.column + column;
+
+      // Перевірка, чи фігура залишається в межах ігрового поля
+      if (targetRow < 0 || targetRow >= PLAYFIELD_ROWS || targetColumn < 0 || targetColumn >= PLAYFIELD_COLUMNS) {
+        return false;
+      }
+
+      // Перевірка на зіткнення з іншими фігурами в ігровому полі
+      if (playfield[targetRow][targetColumn] !== 0) {
+        return false;
+      }
+    }
+  }
+
+  // Перевірка, чи фігура не заходить за верхню межу ігрового поля
+  if (tetromino.row < 0) {
+    return false;
+  }
+
+  return true;
+}
+ */
 
 function isOutsideOfGameBoard(row, column) {
   return tetromino.column + column < 0 ||
@@ -303,6 +338,33 @@ function placeTetromino() {
       const playfieldRow = tetromino.row + row;
       const playfieldColumn = tetromino.column + column;
 
+      // Перевірка, чи є місце для тетроміно на самому початку
+      if (playfieldRow < 0) {
+        continue;
+      }
+
+      // Перевірка, чи можна розмістити тетроміно на ігровому полі
+      if (
+        playfieldRow >= 0 &&
+        playfieldRow < PLAYFIELD_ROWS &&
+        playfieldColumn >= 0 &&
+        playfieldColumn < PLAYFIELD_COLUMNS &&
+        playfield[playfieldRow][playfieldColumn] !== 0
+      ) {
+        isGameOver = true;
+        gameOver();
+        return;
+      }
+    }
+  }
+
+  for (let row = 0; row < matrixSize; row++) {
+    for (let column = 0; column < matrixSize; column++) {
+      if (!tetromino.matrix[row][column]) continue;
+
+      const playfieldRow = tetromino.row + row;
+      const playfieldColumn = tetromino.column + column;
+
       // Check if the cell is within the bounds of the playfield
       if (
         playfieldRow >= 0 &&
@@ -315,38 +377,57 @@ function placeTetromino() {
     }
   }
 
-  const filledRows = findFilledRows();
-  removeFillRows(filledRows);
-
-  //якщо вже фігури не становляться в ігрове поле
+  // Check if the new tetromino can be placed on the playfield
   if (!isValid()) {
     isGameOver = true;
-    gameOver(); // Викликаємо функцію завершення гри
+    gameOver(); // Call the game over function
     return;
   }
 
+  const filledRows = findFilledRows();
+  removeFillRows(filledRows);
+
+  // Generate a new tetromino
   generateTetromino();
+
+  // Draw the playfield and the new tetromino
   draw();
 }
 
+
+ 
+
 function removeFillRows(filledRows) {
-  // Home work task #8
+  // Перевірка, чи існують заповнені рядки
   const rowsCount = filledRows.length;
-  if (rowsCount > 0) {
-    score += calculateScore(filledRows);
-    updateScore();
+  if (rowsCount === 0) {
+    return;
   }
 
+  // Підрахунок та оновлення рахунку
+  score += calculateScore(filledRows);
+  updateScore();
+
+  // Видалення заповнених рядків
   filledRows.forEach(row => {
-    dropRowsAbove(row);
-  })
+    playfield.splice(row, 1);
+    playfield.unshift(new Array(PLAYFIELD_COLUMNS).fill(0));
+  });
 
-  // Перевіряємо, чи є гра закінчена після вилучення рядків
-  if (!isValid()) {
+  // Генерація нового тетроміно
+  generateTetromino();
+
+  // Перевірка, чи гра закінчена
+  if (rowsCount === 0 && !isValid()) {
     isGameOver = true;
-    gameOver(); // Викликаємо функцію завершення гри
+    gameOver();
+    return;
   }
+
+  // Оновлення екрану
+  draw();
 }
+
 
 function dropRowsAbove(rowDelete) {
   for (let row = rowDelete; row > 0; row--) {
@@ -459,11 +540,25 @@ function togglePause() {
   }
 }
 
+/* function gameOver() {
+  if (!isValid()) {
+    isGameOver = true;
+    gameOverBlock.style.display = 'flex';
+  }
+} */
 function gameOver() {
-  isGameOver = true;
-  togglePause();
-  document.getElementById('final-score').textContent = score;
-  gameOverBlock.style.display = 'flex';
+  if (!isValid()) {
+    isGameOver = true;
+
+    // Отримуємо елемент, де ви будете виводити повідомлення гейм оверу та кількість очок
+    const finalScoreElement = document.getElementById('final-score');
+
+    // Встановлюємо текст повідомлення та кількість очок
+    finalScoreElement.textContent = score;
+
+    // View Game over block
+    gameOverBlock.style.display = 'flex';
+  }
 }
 
 const gameOverBlock = document.querySelector('.game-over')
@@ -477,12 +572,14 @@ function restartGame() {
   isPaused = false;
   score = 0;
   updateScore();
+
+  // Очистити ігрове поле
   playfield = new Array(PLAYFIELD_ROWS).fill().map(() => new Array(PLAYFIELD_COLUMNS).fill(0));
+
+  // Генерація нового тетроміно та оновлення екрану
   generateTetromino();
   draw();
+
   // Сховати блок завершення гри, якщо він відображений
   gameOverBlock.style.display = 'none';
-  // Перезапуск інтервалу руху тетроміно
-  clearInterval(tetrominoInterval);
-  tetrominoInterval = setInterval(moveTetrominoDown, moveInterval);
 }
